@@ -405,22 +405,16 @@ and if so it will produce an output which contains the location of the chips in 
 
 (p start-second
   =goal>
-      ISA         goal
-      state       retrieved1
+  ISA         goal
+  state       retrieved0
       =imaginal>
           ISA         story
-          subject     =sub
-          negation    nil
-          verb        =verb
-          object      =obj
-          location    =loc
-          time        =time
-          type        =type
 ==>
   +retrieval>
       ISA         story
       subject     Sally
       time        =time
+      type        perception
     =goal>
       state       retrieve2
   )
@@ -434,6 +428,7 @@ and if so it will produce an output which contains the location of the chips in 
    =retrieval>
        ISA         story
        subject     =sub
+       negation    =neg
        verb        =verb
        object      =obj
        time        =time
@@ -445,58 +440,29 @@ and if so it will produce an output which contains the location of the chips in 
     +imaginal>
         ISA         story
         subject     =sub
+        negation    =neg
         verb        =verb
         object      =obj
         time        =time
 )
 
 
-;; retrive time to access the previous action, since no chunk is referring to Maxi's action
-(p retrieve-time
+
+; Once the model has the last perceived thing of Sally,
+
+(p retrieve-last-action
   =goal>
       ISA        goal
       state      retrieved2
   =immaginal>
       ISA         story
-      subject     =sub
-      negation    not
-      verb        =verb
-      object      =obj
-      time        =time
 ==>
-  =immaginal>
-  +retrieval>
-      ISA         time-fact
-  =goal>
-      state       retrieved-time
-)
-
-; Once the model has the time and the last perceived thing of Sally,
-(p retrieve-last-action
-  =goal>
-      ISA        goal
-      state      retrieved-time
-  =immaginal>
-      ISA         story
-      subject     =sub
-      verb        =verb
-      object      =obj
-      time        =time1
-   =retrieval>
-      ISA         time-fact
-      t0          =time0
-      t1          =time1
-      t2          =time2
-==>
+=goal>
+    state       retrieve-final
   +retrieval>
       ISA         story
-      -subject     =sub
-      negation    nil
-      type        action
-      time        =time0
-   =goal>
-      ISA         goal
-      state       retrieve-final
+      subject     =obj
+      time        1
   )
 
   (p store-final
