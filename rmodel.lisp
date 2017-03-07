@@ -416,13 +416,13 @@ and if so it will produce an output which contains the location of the chips in 
       time        =time
       type        =type
 ==>
+  =goal>
+      state       retrieve2
   +retrieval>
       ISA         story
       subject     =sub
       time        =time
-      type        perception
-  =goal>
-      state       retrieve2
+      -type       =type
   )
 
 ;; store it in the immaginal buffer
