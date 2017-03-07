@@ -407,22 +407,22 @@ and if so it will produce an output which contains the location of the chips in 
   =goal>
       ISA         goal
       state       retrieved1
-  =imaginal>
-      ISA         story
-      subject     =sub
-      verb        =verb
-      object      =obj
-      location    =loc
-      time        =time
-      type        =type
+      =imaginal>
+          ISA         story
+          subject     =sub
+          negation    nil
+          verb        =verb
+          object      =obj
+          location    =loc
+          time        =time
+          type        =type
 ==>
-  =goal>
-      state       retrieve2
   +retrieval>
       ISA         story
-      subject     =sub
+      subject     Sally
       time        =time
-      -type       =type
+    =goal>
+      state       retrieve2
   )
 
 ;; store it in the immaginal buffer
@@ -440,14 +440,14 @@ and if so it will produce an output which contains the location of the chips in 
     ?imaginal>
        state       free
 ==>
+    =goal>
+       state       retrieved2
     +imaginal>
         ISA         story
         subject     =sub
         verb        =verb
         object      =obj
         time        =time
-    =goal>
-       state       retrieved2
 )
 
 
@@ -462,9 +462,7 @@ and if so it will produce an output which contains the location of the chips in 
       negation    not
       verb        =verb
       object      =obj
-      location    =loc
       time        =time
-      type        =type
 ==>
   =immaginal>
   +retrieval>
@@ -576,5 +574,5 @@ because it needs to be executed after the latter. The reward is set to a small v
 ; In the following assignments, you will also add reward values for the first-order and second-order strategies.
 
 (spp start-second :u 10)
-(spp respond-second :reward 0)
+(spp respond-second :reward 5)
 )
