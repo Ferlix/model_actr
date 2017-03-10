@@ -1,6 +1,6 @@
 #|
 
-    Model:    First-order theory of mind reinforcement learning
+    Model:    Second-order theory of mind reinforcement learning
 
     Authors:  Arvid Lindström (s2740761)
               Federico Ferlito (s2936860)
@@ -161,10 +161,7 @@ Here we added the states that are specific to the goal chunk (i.e. the values fo
 |#
 (start isa chunk) (retrieve0 isa chunk) (retrieved0 isa chunk) (done isa chunk)
 (retrieve-zero-percept isa chunk) (retrieve-one-percept isa chunk)
-(retrieve1 isa chunk) (retrieved1 isa chunk)
-
-(retrieve2 isa chunk) (retrieved2 isa chunk) (retrieved-time isa chunk)
-(retrieve-final isa chunk) (retrieved-final isa chunk)
+(retrieved1 isa chunk) (retrieve2 isa chunk) (retrieved2 isa chunk)
 
 ;temporal order chunk. There are three seperate time points in the story:
 ;at t0 Maxi put the chips into the cupboard.
@@ -287,14 +284,14 @@ in a separate file.
       output      =loc
   !output!        (=loc)
   !safe-eval!     (push 0 *response*)
-  !safe-eval! (push (spp (respond-zero start-one start-second) :name :utility :u :at :reward) *response*)
+  !safe-eval! (push (spp (respond-zero start-first start-second) :name :utility :u :at :reward) *response*)
 )
 
 #|
 The model will attempt to simply retrieve the last time that Maxi saw something
 in order to take on his perspective, which is necessary to answer the first-order theory of mind question.
 |#
-(p start-one
+(p start-first
   =goal>
       ISA         goal
       state       retrieved0
@@ -316,7 +313,7 @@ After having retrieved the chunk relative to Maxi's last perception, the model w
 the action that happened at the same time as Maxi's perception. This action will be the one
 which contains the location of the chips.
 |#
-(p retrieve-one
+(p retrieve-first
   =goal>
       ISA         goal
       state       retrieve-one-percept
@@ -329,58 +326,21 @@ which contains the location of the chips.
       ref         =r
 ==>
   =goal>
-      state       retrieve1
+      state       retrieved1
   +retrieval>
       ISA         story
-      negation    nil
-      type        action
-      time        =time
       self-ref    =r
 )
 
 #|
-After having retrieved the chunk which contains the action of Sally moving the chips
-(which Maxi saw), the model will store this information in the imaginal buffer in order
-for it to be used in the next production.
-|#
-(p store-one
-  =goal>
-      ISA         goal
-      state       retrieve1
-  =retrieval>
-      ISA         story
-      subject     =sub
-      negation    nil
-      verb        =verb
-      object      =obj
-      location    =loc
-      time        =time
-      type        =type
-  ?imaginal>
-      state       free
-==>
-  =goal>
-      state       retrieved1
-  +imaginal>
-      ISA         story
-      subject     =sub
-      negation    nil
-      verb        =verb
-      object      =obj
-      location    =loc
-      time        =time
-      type        =type
-)
-
-#|
-In this production the model will check whether it has a chunk in the imaginal module,
+In this production the model will check whether it has a chunk in the retrieval module,
 and if so it will produce an output which contains the location of the chips in that chunk.
 |#
-(p respond-one
+(p respond-first
   =goal>
       ISA         goal
       state       retrieved1
-  =imaginal>
+  =retrieval>
       ISA         story
       subject     =sub
       negation    nil
@@ -395,110 +355,66 @@ and if so it will produce an output which contains the location of the chips in 
       output      =loc
   !output!        (=loc)
   !safe-eval!     (push 1 *response*)
-  !safe-eval! (push (spp (respond-zero start-one start-second) :name :utility :u :at :reward) *response*)
+  !safe-eval! (push (spp (respond-zero start-first start-second) :name :utility :u :at :reward) *response*)
   )
 
-
-;; At this point, the model is reasoning from Maxi's point of view. It already knows that
-;; Maxi saw Sally moving the chips. Now it need to take the perpective of Sally,
-;; in order to check whether or not she saw Maxi when she moved the chips.
-
+#|
+At this point, the model is reasoning from Maxi's point of view. It already knows that
+Maxi saw Sally moving the chips. Now it needs to take the perpective of Sally,
+in order to check whether or not she saw Maxi when she moved the chips. So, this production
+will issue a retrieval request for the chunk in which Sally sees (or not) something.
+|#
 (p start-second
   =goal>
-  ISA         goal
-  state       retrieved0
-      =imaginal>
-          ISA         story
+      ISA         goal
+      state       retrieved0
+  =imaginal>
+      ISA         story
 ==>
+  =goal>
+      state       retrieve2
   +retrieval>
       ISA         story
       subject     Sally
-      time        =time
       type        perception
-    =goal>
-      state       retrieve2
-  )
-
-;; store it in the immaginal buffer
-
- (p retrieve-second
-   =goal>
-       ISA        goal
-       state      retrieve2
-   =retrieval>
-       ISA         story
-       subject     =sub
-       negation    =neg
-       verb        =verb
-       object      =obj
-       time        =time
-    ?imaginal>
-       state       free
-==>
-    =goal>
-       state       retrieved2
-    +imaginal>
-        ISA         story
-        subject     =sub
-        negation    =neg
-        verb        =verb
-        object      =obj
-        time        =time
+      verb        see
 )
 
-
-
-; Once the model has the last perceived thing of Sally,
-
-(p retrieve-last-action
+#|
+Since the retrieved chunk shows that Sally did not see Maxi, this production issues a
+retrieval request for the chunk at time 1 in which an action was carried out, since this
+will be the first occurrence of the chips being moved.
+|#
+(p retrieve-second
   =goal>
       ISA        goal
-      state      retrieved2
-  =immaginal>
+      state      retrieve2
+  =retrieval>
       ISA         story
+      subject     =sub
+      negation    not
+      verb        =verb
+      object      =obj
+      time        =time
+      type        =type
 ==>
-=goal>
-    state       retrieve-final
+  =goal>
+      state       retrieved2
   +retrieval>
       ISA         story
-      subject     =obj
       time        1
-  )
-
-  (p store-final
-    =goal>
-        ISA         goal
-        state       retrieve-final
-    =retrieval>
-        ISA         story
-        subject     =sub
-        negation    nil
-        verb        =verb
-        object      =obj
-        location    =loc
-        time        =time
-        type        =type
-    ?imaginal>
-        state       free
-  ==>
-    +imaginal>
-        ISA         story
-        subject     =sub
-        negation    nil
-        verb        =verb
-        object      =obj
-        location    =loc
-        time        =time
-        type        =type
-    =goal>
-        state       retrieved-final
+      type        action
 )
 
+#|
+Here the chunk relative to Maxi moving the chips has been recalled, and the model thus
+produces the answer both in the output and in the output file.
+|#
 (p respond-second
   =goal>
       ISA         goal
-      state       retrieved-final
-  =imaginal>
+      state       retrieved2
+  =retrieval>
       ISA         story
       subject     =sub
       negation    nil
@@ -512,33 +428,31 @@ and if so it will produce an output which contains the location of the chips in 
       state       done
       output      =loc
   !output!        (=loc)
-  !safe-eval! (push 2 response)
-  !safe-eval! (push (spp (respond-zero start-one start-second) :name :utility :u :at :reward) *response*)
+  !safe-eval! (push 2 *response*)
+  !safe-eval! (push (spp (respond-zero start-first start-second) :name :utility :u :at :reward) *response*)
 )
 
-
-
-;; The assignment will be graded in terms of the following criteria:
-;; 1) Output
-;; 2) Cognitive Plausibility of the production rules
-;; 3) The quality of the code document in terms of clear explanations.
-
-; For the Assignment 2, you're expected to write an initial utility value for the zero-order strategy below.
-; In the following assignments, you will also add intial utility values for the first-order and second-order strategies.
-
-(spp respond-zero :u 50)
+(spp respond-zero :u 70)
 (spp respond-zero :reward 0)
 
 #|
 Here we set the utility and reward values for the first-order reasoning. The utility value is lower than for the zero-order,
 because it needs to be executed after the latter. The reward is set to a small value so that the improvement in performance is gradual.
 |#
-(spp start-one :u 20)
-(spp respond-one :reward 0)
+(spp start-first :u 20)
+(spp respond-first :reward 0)
 
-; For the Assignment 2, you're expected to write a reward value for the zero-order stategy below.
-; In the following assignments, you will also add reward values for the first-order and second-order strategies.
+#|
+Here we set the utility and reward values for the second-order reasoning. The utility value is very low, because it is the reasoning
+that is executed last, after zero and first-order reasoning. The reward is quite high, because it is the correct reasoning to use
+and the model needs to have positive feedback to reinforce it.
+|#
+(spp start-second :u 5)
+(spp respond-second :reward 15)
 
-(spp start-second :u 10)
-(spp respond-second :reward 5)
 )
+
+;; The assignment will be graded in terms of the following criteria:
+;; 1) Output
+;; 2) Cognitive Plausibility of the production rules
+;; 3) The quality of the code document in terms of clear explanations.
