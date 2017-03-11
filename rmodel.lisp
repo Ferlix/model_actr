@@ -110,9 +110,9 @@
 ;; The parameters below for tracking the model’s trace. You can change them if you need to turn off the details etc.
 ;; See reference manual of ACT-R for further details, which is in the “docs” folder of ACT-R’s main folder
 
-        :ult t ;turn on the trace for the utilities
+        :ult nil ;turn on the trace for the utilities
         :v  t   ; trace detail
-        :act low  ; activation trace parameter
+        :act nil  ; activation trace parameter
         :sact low ; save activation trace
 
 )
@@ -359,10 +359,21 @@ and if so it will produce an output which contains the location of the chips in 
   )
 
 #|
-At this point, the model is reasoning from Maxi's point of view. It already knows that
-Maxi saw Sally moving the chips. Now it needs to take the perpective of Sally,
-in order to check whether or not she saw Maxi when she moved the chips. So, this production
-will issue a retrieval request for the chunk in which Sally sees (or not) something.
+At this point, the model is reasoning from the mother's point of view: it has the
+chunk in the immaginal buffer containing the position "trashbin", where she put them.
+The following rule, "start-second", will compete  with two rules:
+ "respond-zero" (the one for responding with zero order TOM strategy) and "start-first"
+ (the one that starts the 1st order TOM strategy).
+
+ To answer the question:
+  "Where does Sally think that Maxi will look for the chips?"
+ in psychological plausible way, the model needs to retrieve the last perceived thing by Sally,
+ since she's the last person that moved the chips before the mother (but Sally hadn't seen her!).
+ Thus, if she knows that Maxi saw her when she moved the chips in the oven, this place will
+ be the answer. Otherwise, if she haven't seen him, then Maxi doesn't know that the chips
+ were moved there, so the answer will be the last action he did (or the last perceived movement of
+ the chips that he saw before).
+
 |#
 (p start-second
   =goal>
@@ -381,9 +392,10 @@ will issue a retrieval request for the chunk in which Sally sees (or not) someth
 )
 
 #|
-Since the retrieved chunk shows that Sally did not see Maxi, this production issues a
-retrieval request for the chunk at time 1 in which an action was carried out, since this
-will be the first occurrence of the chips being moved.
+Since the retrieved chunk shows that Sally did not see Maxi when she moved the chips,
+this production issues a retrieval request for the chunk at time 1 in which an action
+ regarding Maxi was carried out, since this will be the first occurrence of the chips being moved
+ in which he's involved.
 |#
 (p retrieve-second
   =goal>
@@ -402,6 +414,7 @@ will be the first occurrence of the chips being moved.
       state       retrieved2
   +retrieval>
       ISA         story
+      subject     Maxi
       time        1
       type        action
 )
