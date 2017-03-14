@@ -103,7 +103,7 @@
   :ol t  ;  optimised learning
   :rt -20  ;  retrieval threshold
   :ans nil ;  instantaneous noise
-  :egs 0;  utility noise
+  :egs 0 ;  utility noise
   :ul t  ;  utility learning
   :pas nil; permanent noise
 
